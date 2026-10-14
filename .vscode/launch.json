@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "nginx-auth-app",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "app.main:app",
+                "--reload",
+                "--port", "4014",
+                "--host", "0.0.0.0"
+            ],
+            "env": {
+                "ROUTE_PATH": "xauth",
+                "PWD_HASH_KEY":"thisismysuuuuuuperlonghashKey"
+            },
+            "jinja": true,
+            "justMyCode": true
+        }
+    ]
+    }

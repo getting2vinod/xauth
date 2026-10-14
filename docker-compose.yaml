@@ -1,0 +1,20 @@
+services:
+  xauth:
+    image: python:xauth
+    container_name: xauth.myapps.localhost
+    hostname: xauth.myapps.localhost
+    restart: always
+    ports:
+      - "4014:4014"
+    volumes:
+      - ./config:/app/config
+      - ./app:/app     
+    environment:
+       ROUTE_PATH: "xauth"
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
+    external: true

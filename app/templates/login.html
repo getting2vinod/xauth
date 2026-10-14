@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <!-- Use Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        :root {
+            /* Define colors based on the image */
+            --bg-color: #f7f9fc;
+            --text-dark: #3a3a3a;
+            --placeholder-color: #7f8fa4;
+            --input-bg: #e0e6ed;
+            --input-border: #ced4da;
+            --btn-blue: #4085c1;
+            --btn-blue-hover: #336da1;
+            --link-blue: #3284cd;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 380px; /* Adjust width to match the image ratio */
+            padding: 2.5rem 2rem;
+        }
+
+        .login-icon {
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        /* SVG matching the icon in the image */
+        .login-icon svg {
+            width: 70px;
+            height: auto;
+            stroke: var(--text-dark);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .login-title {
+            font-size: 2rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+
+        .form-control {
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            padding: 0.6rem 0.75rem;
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+
+        .form-control::placeholder {
+            color: var(--placeholder-color);
+            opacity: 1;
+        }
+
+        .form-control:focus {
+            background-color: var(--input-bg);
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-login {
+            background-color: var(--btn-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.6rem;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-top: 1rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-login:hover {
+            background-color: var(--btn-blue-hover);
+            color: #ffffff;
+        }
+
+        .cancel-link {
+            display: inline-block;
+            color: var(--link-blue);
+            text-decoration: none;
+            margin-top: 1.25rem;
+            font-size: 1rem;
+        }
+
+        .cancel-link:hover {
+            text-decoration: underline;
+        }
+
+        .footnote {
+            color: var(--text-dark);
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Styling for the error alert box */
+        .alert-danger {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        
+        <!-- ID Badge Icon -->
+        <div class="login-icon">
+            <svg viewBox="0 0 46 64" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5,12 L5,60 L41,60 L41,12 L30,12 L30,5 C30,2.23857625 27.7614237,0 25,0 L21,0 C18.2385763,0 16,2.23857625 16,5 L16,12 L5,12 Z M18,5 C18,3.34314575 19.3431458,2 21,2 L25,2 C26.6568542,2 28,3.34314575 28,5 L28,12 L18,12 L18,5 Z" stroke-linecap="round"></path>
+                <circle cx="23" cy="27" r="5"></circle>
+                <path d="M15,39 C15,34.581722 18.581722,31 23,31 C27.418278,31 31,34.581722 31,39 L15,39 Z" stroke-linecap="round"></path>
+                <line x1="15" y1="44" x2="31" y2="44" stroke-linecap="round"></line>
+                <line x1="15" y1="49" x2="31" y2="49" stroke-linecap="round"></line>
+                <line x1="21" y1="54" x2="25" y2="54" stroke-linecap="round"></line>
+            </svg>
+        </div>
+
+        <h1 class="login-title">Login</h1>
+
+        <!-- Optional: Error Message Display -->
+        {% if error %}
+            <div class="alert alert-danger text-center" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- Form with the correct action using ROUTE_PATH -->
+        <form method="POST" action="/{{ ROUTE_PATH }}/login">
+            <input type="hidden" name="next" value="{{ next }}">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter password / Leave blank on first session*">
+            </div>
+
+            <button type="submit" class="btn btn-login">Login</button>
+        </form>
+
+        <a href="/{{ ROUTE_PATH }}/" class="cancel-link">Cancel</a>
+
+        <div class="footnote">
+            * Leave blank only after internal registration
+        </div>
+    </div>
+
+    <!-- Optional Bootstrap JS (not strictly needed for this simple form) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6Rz5YN6gr3g8hF6v1v1+1L1H1I1+2r1i9+3R1r1i9+3R1r1i9+3R" crossorigin="anonymous"></script>
+</body>
+</html>
