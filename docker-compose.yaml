@@ -1,5 +1,6 @@
 services:
   xauth:
+    build: .
     image: python:xauth
     container_name: xauth.myapps.localhost
     hostname: xauth.myapps.localhost
@@ -10,7 +11,8 @@ services:
       - ./config:/app/config
       - ./app:/app     
     environment:
-       ROUTE_PATH: "xauth"
+      - ROUTE_PATH=xauth
+      - PWD_HASH_KEY=thisismysuuuuuuperlonghashKey
     networks:
       - net
 
