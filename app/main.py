@@ -79,10 +79,30 @@ async def login_action(
 
 @app.get("/update-password")
 async def update_password_page(request: Request, username: str, next: str = ""):
+    # Check if the user already has a password set in the sheet
+    # We can check via a helper or query to determine if current password field is needed
+    from app.services import get_sheet
+    sheet = get_sheet()
+    records = sheet.get_all_records()
+    requires_current = False
+    
+    for row in records:
+        row_username = str(row.get("UserName") or row.get("username") or row.get("User") or "").strip()
+        if row_username.lower() == username.strip().lower():
+            db_password = str(row.get("Password") or row.get("password") or "").strip()
+            if db_password:
+                requires_current = True
+            break
+
     return templates.TemplateResponse(
         request,
         "update_password.html",
-        {"ROUTE_PATH": settings.ROUTE_PATH, "username": username, "next": next}
+        {
+            "ROUTE_PATH": settings.ROUTE_PATH, 
+            "username": username, 
+            "next": next,
+            "requires_current": requires_current
+        }
     )
 
 @app.post("/update-password")
@@ -91,6 +111,7 @@ async def update_password_action(
     username: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
+    current_password: str = Form(default=None),
     next: str = Form(default="")
 ):
     if password != confirm_password:
@@ -101,17 +122,24 @@ async def update_password_action(
                 "ROUTE_PATH": settings.ROUTE_PATH, 
                 "username": username, 
                 "next": next,
+                "requires_current": bool(current_password),
                 "error": "Passwords do not match. Please try again."
             }
         )
 
-    result = update_user_password(username, password)
+    # Call service passing current_password for verification if applicable
+    result = update_user_password(username, password, current_password=current_password)
+    
     if result["status"] == "success":
         login_url = f"/{settings.ROUTE_PATH}/login"
         if next:
             login_url += f"?next={next}"
         return RedirectResponse(url=login_url, status_code=status.HTTP_303_SEE_OTHER)
         
+    error_message = "User not found"
+    if result["status"] == "invalid_current_password":
+        error_message = "Incorrect current password. Please try again."
+
     return templates.TemplateResponse(
         request,
         "update_password.html",
@@ -119,9 +147,30 @@ async def update_password_action(
             "ROUTE_PATH": settings.ROUTE_PATH, 
             "username": username, 
             "next": next,
-            "error": "User not found"
+            "requires_current": True,
+            "error": error_message
         }
     )
+
+@app.get("/widget/user-bar", response_class=HTMLResponse)
+async def get_user_widget(request: Request):
+    # Verify token from cookies/headers to identify the user
+    # If unauthenticated, return a login prompt snippet instead
+
+    html_snippet = f"""
+    <div id="xauth-user-widget" style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="User Icon" style="width: 32px; height: 32px; border-radius: 50%;">
+        <a href="/" + settings.ROUTE_PATH + "/update-password" target="_blank" style="text-decoration: none; color: #007bff;">Update Password</a>
+        <a href="/" + settings.ROUTE_PATH + "/logout" style="text-decoration: none; color: #dc3545;">Logout</a>
+    </div>
+    """
+    return html_snippet
+
+@app.get("/logout")
+async def logout():
+    response = HTMLResponse("<h3>You have been logged out successfully.</h3><p><a href='/'>Login again</a></p>")
+    response.delete_cookie(key="access_token") # Adjust to your cookie name
+    return response
 
 @app.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):

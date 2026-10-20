@@ -98,13 +98,25 @@ def verify_user(username: str, plain_password: str):
                 
     return {"status": "user_not_found"}
 
-def update_user_password(username: str, new_password: str):
+def update_user_password(username: str, new_password: str, current_password: str | None = None):
+    """
+    Updates the user's password in Google Sheets.
+    If `current_password` is provided, it verifies the current password before proceeding.
+    """
     sheet = get_sheet()
     records = sheet.get_all_records()
     
     for i, row in enumerate(records, start=2):
         row_username = str(row.get("UserName") or row.get("username") or row.get("User") or "").strip()
         if row_username.lower() == username.strip().lower():
+            db_password = str(row.get("Password") or row.get("password") or "").strip()
+
+            # Verify current password if user already has a password set and current_password is given
+            if db_password and current_password is not None:
+                hashed_current = encrypt(current_password)
+                if not hmac.compare_digest(hashed_current, db_password):
+                    return {"status": "invalid_current_password"}
+            
             hashed_password = encrypt(new_password)
             now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
             
